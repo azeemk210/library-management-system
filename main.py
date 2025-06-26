@@ -1,13 +1,13 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from db import get_db_connection
 from schemas import Author, Book, AuthorCreate, BookCreate
+from typing import List, Optional
 
 
 app = FastAPI()
 
 
-@app.post("/authors")
+@app.post("/authors", response_model=Author)
 def create_author(author: AuthorCreate):
     conn, cursor = get_db_connection()
     cursor.execute("INSERT INTO authors (name, birth_year) VALUES (%s, %s) RETURNING id", (author.name, author.birth_year))
@@ -81,7 +81,7 @@ def delete_book(book_id: int):
     cursor.close()
     conn.close()
     if result:
-        return {"message": f"Bookd with id {book_id} is moved to recycle bin"}
+        return {"message": f"Book with id {book_id} is moved to recycle bin"}
     else:
         return {"error": "Book not found or already deleted"}
 
